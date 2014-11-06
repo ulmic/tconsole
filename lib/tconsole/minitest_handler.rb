@@ -3,19 +3,18 @@ module TConsole
   class MiniTestHandler
     def self.setup(match_patterns, config)
       # Make sure we have a recent version of minitest, and use it
-      if ::MiniTest::Unit.respond_to?(:runner=)
-        ::MiniTest::Unit.runner = TConsole::MiniTestUnit.new(match_patterns, config)
-      else
-        raise "MiniTest v#{MiniTest::Unit::VERSION} is not compatible with tconsole. Please load a more recent version of MiniTest"
-      end
+      #if ::MiniTest::Unit.respond_to?(:runner=)
+      #  ::MiniTest::Unit.runner = TConsole::MiniTestUnit.new(match_patterns, config)
+      #else
+      #  raise "MiniTest v#{MiniTest::Unit::VERSION} is not compatible with tconsole. Please load a more recent version of MiniTest"
+      #end
 
-      ::MiniTest::Unit.runner
+      #::MiniTest::Unit.runner
     end
 
     # Preloads our element cache for autocompletion. Assumes tests are already loaded
     def self.preload_elements
       patch_minitest
-
       results = TConsole::TestResult.new
       suites = ::Minitest::Runnable.runnables
       suites.each do |suite|
@@ -27,19 +26,18 @@ module TConsole
       results
     end
 
-
     # We're basically breaking MiniTest autorun here, since we want to manually run our
     # tests and Rails relies on autorun
-    #
     # A big reason for the need for this is that we're trying to work in the Rake environment
     # rather than rebuilding all of the code in Rake just to get test prep happening
     # correctly.
     def self.patch_minitest
-      ::MiniTest::Unit.class_eval do
-        def run(args = [])
-          # do nothing
+      MiniTest.class_eval do
+        class << self
+          alias_method :old_run, :run
+          def run(args = [])
+          end
         end
-        alias_method :old_run, :run
       end
     end
   end
