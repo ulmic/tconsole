@@ -1,3 +1,4 @@
+require 'minitest'
 module TConsole
   class MiniTestHandler
     def self.setup(match_patterns, config)
@@ -16,10 +17,9 @@ module TConsole
       patch_minitest
 
       results = TConsole::TestResult.new
-
-      suites = ::MiniTest::Unit::TestCase.test_suites
+      suites = ::Minitest::Runnable.runnables
       suites.each do |suite|
-        suite.test_methods.map do |method|
+        suite.methods_matching(/^test/).map do |method|
           id = results.add_element(suite, method)
         end
       end
@@ -36,16 +36,17 @@ module TConsole
     # correctly.
     def self.patch_minitest
       ::MiniTest::Unit.class_eval do
-        alias_method :old_run, :run
         def run(args = [])
           # do nothing
         end
+        alias_method :old_run, :run
       end
     end
   end
 
+  include MiniTest
   # Custom minitest runner for tconsole
-  class MiniTestUnit < ::MiniTest::Unit
+  class MiniTestUnit < MiniTest::Unit
     COLOR_MAP = {
       "S" => ::Term::ANSIColor.cyan,
       "E" => ::Term::ANSIColor.red,
