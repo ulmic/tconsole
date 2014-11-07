@@ -93,7 +93,6 @@ module TConsole
     end
 
     def print_info(e, name=true)
-      print "#{e.exception.class.to_s}: " if name
       e.message.each_line { |line| print_with_info_padding(line) }
 
       trace = filter_backtrace(e.backtrace)
@@ -157,9 +156,11 @@ module TConsole
     def record(test)
       super
       # TODO хорошо бы избавиться от @current_element_id
-      print pad_test("#{test.name} #{@current_element_id}")
+      str = "#{::Term::ANSIColor.magenta(@current_element_id)} #{colored_string(test.name, test)}"
+      print pad_test(str)
       print_colored_status(test)
       print(" (%.2fs)" % test.time)
+      print()
       puts
       if !test.skipped? && test.failure
         @tc_results.failures << @current_element_id
@@ -169,6 +170,16 @@ module TConsole
     end
 
     protected
+
+    def colored_string(str, test)
+      if test.passed?
+        ::Term::ANSIColor.green(str)
+      elsif test.skipped?
+        ::Term::ANSIColor.yellow(str)
+      else
+        ::Term::ANSIColor.red(str)
+      end
+    end
 
     def before_suite(suite)
       puts suite

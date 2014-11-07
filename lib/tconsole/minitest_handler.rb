@@ -29,12 +29,15 @@ module TConsole
           end
 
           if !suite_printed && (match_patterns.nil? || match_patterns.empty? || !match.nil?)
-            puts("#{suite} #{suite_id}")
+            print(::Term::ANSIColor.cyan, suite, ::Term::ANSIColor.reset,
+                  ::Term::ANSIColor.magenta, " #{suite_id} \n")
             suite_printed = true
           end
 
           if match_patterns.nil? || match_patterns.empty? || !match.nil?
             @reporter.current_element_id = id
+            # TODO мб понтово свой метод run в минитест захуярить,
+            # который список suites принимать будет
             Minitest::Runnable.run_one_method(suite, method, @reporter)
           end
         end
