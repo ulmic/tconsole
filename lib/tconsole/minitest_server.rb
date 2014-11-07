@@ -35,6 +35,7 @@ module TConsole
           if defined?(::Minitest)
             reporter.trace("Detected minitest.")
             require File.join(File.dirname(__FILE__), "minitest_handler")
+            require File.join(File.dirname(__FILE__), "minitest_reporter")
 
             reporter.trace("Running tests.")
             MiniTestHandler.setup(config)
@@ -48,7 +49,7 @@ module TConsole
             #end
 
 
-            result = MiniTestHandler.match_and_run(match_patterns, config, reporter)
+            result = MiniTestHandler.match_and_run(match_patterns, config)
 
             # Make sure minitest doesn't run automatically
             MiniTestHandler.patch_minitest
