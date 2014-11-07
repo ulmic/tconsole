@@ -3,23 +3,21 @@ require 'minitest'
 module TConsole
   class MiniTestHandler
     def self.setup(config)
-      @results = TConsole::TestResult.new
-
-      @results.suite_counts = config.cached_suite_counts
-      @results.elements = config.cached_elements
+      @reporter = ::TConsole::MinitestReporter.new
+      @reporter.tc_results.suite_counts = config.cached_suite_counts
+      @reporter.tc_results.elements = config.cached_elements
     end
 
-    def self.match_and_run(match_patterns, config, reporter)
+    def self.match_and_run(match_patterns, config)
+
       suites = Minitest::Runnable.runnables
 
       suites.each do |suite|
-        suite_id = @results.elements[suite.to_s]
-        if suite.methods_matching(/^test/).any?
-          #reporter.info("#{suite} #{suite_id}")
-        end
+        suite_id = @reporter.tc_results.elements[suite.to_s]
 
+        suite_printed = false
         suite.methods_matching(/^test/).map do |method|
-          id = @results.add_element(suite, method)
+          id = @reporter.tc_results.add_element(suite, method)
 
           unless match_patterns.nil?
             match = match_patterns.find do |pattern|
@@ -30,38 +28,23 @@ module TConsole
             end
           end
 
+          if !suite_printed && (match_patterns.nil? || match_patterns.empty? || !match.nil?)
+            puts("#{suite} #{suite_id}")
+            suite_printed = true
+          end
+
           if match_patterns.nil? || match_patterns.empty? || !match.nil?
-            # TODO переделать на Minitest::Runnable.run_one_method(klass, method,
-            # reporter), совать reporter
-            res = Minitest.run_one_method(suite, method)
-
-            # TODO надо вместо этого говна прикрутить minitest-reporters
-            test_res = if res.error?
-              reporter.error("#{suite}##{method} #{id} ERROR")
-              # TODO
-              reporter.info(res.failure.exception.message)
-              reporter.info(Minitest.filter_backtrace(res.failure.exception.backtrace))
-            elsif res.skipped?
-              reporter.warn("#{suite}##{method} #{id} SKIP")
-            elsif res.failure
-              @results.failures << id
-              reporter.error("#{suite}##{method} #{id} FAIL")
-              # TODO
-              reporter.info(res.failure.exception.message)
-              reporter.info(Minitest.filter_backtrace(res.failure.exception.backtrace))
-            else
-              reporter.exclaim("#{suite}##{method} #{id} PASS")
-            end
-
+            @reporter.current_element_id = id
+            Minitest::Runnable.run_one_method(suite, method, @reporter)
           end
         end
 
-        if suite.methods_matching(/^test/).any?
-          #reporter.info("")
+        if suite_printed
+          puts
         end
       end
 
-      @results
+      @reporter.tc_results
     end
 
     # Preloads our element cache for autocompletion. Assumes tests are already loaded
