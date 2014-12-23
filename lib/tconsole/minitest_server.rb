@@ -57,9 +57,9 @@ module TConsole
 
             reporter.trace("Finished running tests.")
 
-            #if runner.interrupted
-            #  reporter.error("Test run was interrupted.")
-            #end
+            if runner.interrupted
+              reporter.error("Test run was interrupted.")
+            end
 
           elsif defined?(::Test::Unit)
             reporter.error("Sorry, but #{config.app} doesn't support Test::Unit")
