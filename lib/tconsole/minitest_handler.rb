@@ -15,6 +15,7 @@ module TConsole
 
       suites = Minitest::Runnable.runnables
 
+      @reporter.ready
       suites.each do |suite|
         suite_id = @reporter.tc_results.elements[suite.to_s]
 
@@ -55,7 +56,7 @@ module TConsole
         end
       end
 
-      @reporter.tc_results
+      [@reporter.tc_results, @reporter]
     end
 
     # Preloads our element cache for autocompletion. Assumes tests are already loaded

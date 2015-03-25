@@ -50,8 +50,10 @@ module TConsole
             end
 
 
-            result = runner.match_and_run(match_patterns, config)
+            result, res_reporter = runner.match_and_run(match_patterns, config)
 
+
+            res_reporter.report
             # Make sure minitest doesn't run automatically
             MiniTestHandler.patch_minitest
 
