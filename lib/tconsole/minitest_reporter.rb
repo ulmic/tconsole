@@ -155,8 +155,8 @@ module TConsole
       res_str += send(color) { '%d failures, %d errors, ' } % [failures, errors]
       res_str += yellow { '%d skips' } % skips
       puts(res_str)
-      if failures == 0
-        puts(green { "All tests passed! You're are good!" })
+      if failures == 0 && errors == 0
+        puts(green { "All tests passed! You are good!" })
       end
       puts
     end
