@@ -156,6 +156,7 @@ module TConsole
       res_str += yellow { '%d skips' } % skips
       puts(res_str)
       if failures == 0 && errors == 0
+        puts
         puts(green { "All tests passed! You are good!" })
       end
       puts
