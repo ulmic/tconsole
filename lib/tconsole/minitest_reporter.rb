@@ -150,14 +150,14 @@ module TConsole
       super
       puts('Finished in %.5fs' % total_time)
       res_str = '%d tests, ' % [count]
-      res_str += green { '%d assertions' } % assertions
+      res_str += green { '%d assertions, ' } % assertions
       color = failures.zero? && errors.zero? ? :green : :red
       res_str += send(color) { '%d failures, %d errors, ' } % [failures, errors]
       res_str += yellow { '%d skips' } % skips
-      if failures == 0
-        res_str += green { "All tests passed! You're are good!" }
-      end
       puts(res_str)
+      if failures == 0
+        puts(green { "All tests passed! You're are good!" })
+      end
       puts
     end
 
