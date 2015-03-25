@@ -154,7 +154,7 @@ module TConsole
       color = failures.zero? && errors.zero? ? :green : :red
       res_str += send(color) { '%d failures, %d errors, ' } % [failures, errors]
       res_str += yellow { '%d skips' } % skips
-      if failures.count == 0
+      if failures == 0
         res_str += green { "All tests passed! You're are good!" }
       end
       puts(res_str)
