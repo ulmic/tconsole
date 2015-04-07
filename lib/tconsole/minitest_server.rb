@@ -38,27 +38,29 @@ module TConsole
             require File.join(File.dirname(__FILE__), "minitest_reporter")
 
             reporter.trace("Running tests.")
-            MiniTestHandler.setup(config)
+            runner = MiniTestHandler.new(config)
+
             # TODO надо починить Ctrl+C
             # Handle trapping interrupts
-            #trap("SIGINT") do
-            #  reporter.warn
-            #  reporter.warn("Trapped interrupt. Halting tests.")
+            trap("SIGINT") do
+              reporter.warn
+              reporter.warn("Trapped interrupt. Halting tests.")
 
-            #  runner.interrupted = true
-            #end
+              runner.interrupted = true
+            end
 
 
-            result = MiniTestHandler.match_and_run(match_patterns, config)
+            result, res_reporter = runner.match_and_run(match_patterns, config)
 
+            res_reporter.report
             # Make sure minitest doesn't run automatically
             MiniTestHandler.patch_minitest
 
             reporter.trace("Finished running tests.")
 
-            #if runner.interrupted
-            #  reporter.error("Test run was interrupted.")
-            #end
+            if runner.interrupted
+              reporter.error("Test run was interrupted.")
+            end
 
           elsif defined?(::Test::Unit)
             reporter.error("Sorry, but #{config.app} doesn't support Test::Unit")

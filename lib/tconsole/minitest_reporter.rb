@@ -137,19 +137,30 @@ module TConsole
       super
     end
 
-    def start
-      super
-      puts('Started with run options %s' % options[:args])
-      puts
+    def start # not used
+      #super
+    end
+
+    def ready
+      #super
+      self.start_time = Time.now
     end
 
     def report
       super
       puts('Finished in %.5fs' % total_time)
-      print('%d tests, %d assertions, ' % [count, assertions])
+      res_str = '%d tests, ' % [count]
+      res_str += '%d assertions, ' % assertions
+      passed = count - (failures + errors + skips)
+      res_str += green { '%d passed, ' } % passed
       color = failures.zero? && errors.zero? ? :green : :red
-      print(send(color) { '%d failures, %d errors, ' } % [failures, errors])
-      print(yellow { '%d skips' } % skips)
+      res_str += send(color) { '%d failures, %d errors, ' } % [failures, errors]
+      res_str += yellow { '%d skips' } % skips
+      puts(res_str)
+      if failures == 0 && errors == 0
+        puts
+        puts(green { "All tests passed! You are good!" })
+      end
       puts
     end
 

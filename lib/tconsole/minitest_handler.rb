@@ -2,21 +2,29 @@
 require 'minitest'
 module TConsole
   class MiniTestHandler
-    def self.setup(config)
+    attr_accessor :interrupted
+
+    def initialize(config)
       @reporter = ::TConsole::MinitestReporter.new
       @reporter.tc_results.suite_counts = config.cached_suite_counts
       @reporter.tc_results.elements = config.cached_elements
+      @interrupted = false
     end
 
-    def self.match_and_run(match_patterns, config)
+    def match_and_run(match_patterns, config)
 
       suites = Minitest::Runnable.runnables
 
+      @reporter.ready
       suites.each do |suite|
         suite_id = @reporter.tc_results.elements[suite.to_s]
 
         suite_printed = false
         suite.methods_matching(/^test/).map do |method|
+          if @interrupted
+            return @reporter.tc_results
+          end
+
           id = @reporter.tc_results.add_element(suite, method)
 
           unless match_patterns.nil?
@@ -47,7 +55,7 @@ module TConsole
         end
       end
 
-      @reporter.tc_results
+      [@reporter.tc_results, @reporter]
     end
 
     # Preloads our element cache for autocompletion. Assumes tests are already loaded
