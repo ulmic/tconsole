@@ -143,7 +143,11 @@ module TConsole
 
     def ready
       #super
-      self.start_time = Time.now
+      if defined? Minitest.clock_time
+        self.start_time = Minitest.clock_time
+      else
+        self.start_time = Time.now
+      end
     end
 
     def report
